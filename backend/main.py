@@ -19,7 +19,7 @@ def portfolio():
 def homepage():
     # Get client stocks from portfolio
     client_stocks = portfolio()
-    stock_dict    = {}
+    stock_dict = {}
 
     # Create a dictionary of stock tickers and quantities
     for item in client_stocks["portfolios"][0]["items"]:

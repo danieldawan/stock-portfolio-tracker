@@ -1,2 +1,3 @@
 https://github.com/calonso/IeMcsbtIntegrationProject/tree/main/labs
 https://nextui.org
+https://github.com/chris-trapstar/nextui-dashboard/tree/main
