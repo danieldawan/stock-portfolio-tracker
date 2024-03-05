@@ -14,6 +14,7 @@ export default function Sidebar() {
           className="my-4"
           style={{ width: "200px" }}
           isPressable="True"
+          disableRipple="True"
           onPress={() => {
             window.location.href = `/${item.ticker}`;
           }}
