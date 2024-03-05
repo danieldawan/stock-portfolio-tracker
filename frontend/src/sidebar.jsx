@@ -7,14 +7,14 @@ export default function Sidebar() {
   const portfolioItems = portfolioData.portfolios[0].items;
 
   return (
-    <div>
+    <div style={{ marginLeft: "20px" }}>
       {portfolioItems.map((item, index) => (
         <Card
           key={index}
           className="my-4"
           style={{ width: "200px" }}
-          isPressable="True"
-          disableRipple="True"
+          isPressable={true}
+          disableRipple={true}
           onPress={() => {
             window.location.href = `/${item.ticker}`;
           }}
