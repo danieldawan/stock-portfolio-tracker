@@ -1,27 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader } from "@nextui-org/react";
-import portfolioData from "/Users/danieldawan/VSCode/stock-portfolio-tracker/backend/portfolio.json";
 
 export default function Sidebar() {
   const [portfolioItems, setPortfolioItems] = useState([]);
 
   useEffect(() => {
-    setPortfolioItems(portfolioData.portfolios[0].items);
+    // Fetch the portfolio data from the backend
+    fetch(`https://mcsbt-integration-416413.lm.r.appspot.com`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Transform the fetched data into the expected format
+        const items = Object.entries(data).map(([ticker, quantity]) => ({
+          ticker,
+          quantity,
+        }));
+        setPortfolioItems(items);
+      })
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
     const fetchPercentageChanges = async () => {
       const promises = portfolioItems.map((item) =>
-        fetch(`http://127.0.0.1:5000/${item.ticker}`).then((response) =>
-          response.json()
-        )
+        fetch(
+          `https://mcsbt-integration-416413.lm.r.appspot.com/${item.ticker}`
+        ).then((response) => response.json())
       );
 
       const results = await Promise.all(promises);
       const updatedItems = portfolioItems.map((item, index) => {
-        const { percent_change } = results[index];
-        return { ...item, percent_change: percent_change || "N/A" };
-        g;
+        const percent_change = results[index].percent_change || "N/A";
+        return { ...item, percent_change };
       });
 
       setPortfolioItems(updatedItems);

@@ -7,7 +7,9 @@ const Header = () => {
 
   // Fetch the total portfolio value from the backend on component mount
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/total-portfolio-value")
+    fetch(
+      "https://mcsbt-integration-416413.lm.r.appspot.com/total-portfolio-value"
+    )
       .then((response) => response.json())
       .then((data) => {
         setTotalValue(data.total_portfolio_value.toFixed(2));

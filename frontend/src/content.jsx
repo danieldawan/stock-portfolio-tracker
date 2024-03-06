@@ -17,7 +17,7 @@ const Content = ({ marginTop = "20px" }) => {
   useEffect(() => {
     if (!isSummaryPage) {
       const ticker = location.pathname.substring(1); // Extract ticker from the pathname
-      fetch(`http://127.0.0.1:5000/${ticker}`)
+      fetch(`https://mcsbt-integration-416413.lm.r.appspot.com/${ticker}`)
         .then((response) => response.json())
         .then((data) => {
           let formattedData = Object.entries(data.stock_info).map(
