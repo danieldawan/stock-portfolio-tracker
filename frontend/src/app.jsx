@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Import Navigate
 import Sidebar from "./sidebar.jsx";
 import Header from "./header.jsx";
 import Content from "./content.jsx";
@@ -21,13 +21,17 @@ function App() {
             <Sidebar />
           </div>
           <div style={{ flex: 1 }}>
-            {/* Setup Routes within Routes component */}
             <Routes>
+              {/* Setup Routes within Routes component */}
+
               {/* Define the route for the Content component to display stock info based on ticker */}
               <Route path="/:ticker" element={<Content />} />
-              {/* Optionally, define a default route or a landing page */}
-              {/* Assuming Sidebar is your landing page or replace <Sidebar /> with your landing page component */}
+
+              {/* Define the route for the Summary page */}
               <Route path="/summary" element={<Content />} />
+
+              {/* Redirect from root to the Summary page */}
+              <Route path="/" element={<Navigate replace to="/summary" />} />
             </Routes>
           </div>
         </div>
