@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; // Import useLocation instead of useParams
+import { useLocation } from "react-router-dom";
 import {
   Table,
   TableHeader,
@@ -10,9 +10,9 @@ import {
 } from "@nextui-org/react";
 
 const Content = ({ marginTop = "20px" }) => {
-  const location = useLocation(); // Use useLocation to access the location object
+  const location = useLocation();
   const [stockInfo, setStockInfo] = useState([]);
-  const isSummaryPage = location.pathname === "/summary"; // Check if the current page is /summary
+  const isSummaryPage = location.pathname === "/summary";
 
   useEffect(() => {
     if (!isSummaryPage) {
@@ -44,7 +44,6 @@ const Content = ({ marginTop = "20px" }) => {
     }
   }, [location.pathname]); // Depend on location.pathname for fetching stock data
 
-  // Render a simple message if the route is /summary
   if (isSummaryPage) {
     return (
       <div

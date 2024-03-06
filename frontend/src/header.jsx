@@ -7,7 +7,7 @@ const Header = () => {
 
   // Fetch the total portfolio value from the backend on component mount
   useEffect(() => {
-    fetch("http://127.0.0.1:5000//total-portfolio-value")
+    fetch("http://127.0.0.1:5000/total-portfolio-value")
       .then((response) => response.json())
       .then((data) => {
         setTotalValue(data.total_portfolio_value.toFixed(2));
@@ -47,7 +47,7 @@ const Header = () => {
         >
           <CardHeader className="flex-col items-start justify-between">
             <h4 style={{ margin: 0, fontWeight: "bold" }}>Total Value</h4>
-            {/* Dynamically display the total value */}
+            {/* Display the total value */}
             <small>${totalValue}</small>
           </CardHeader>
         </Card>
@@ -61,7 +61,7 @@ const Header = () => {
           position: "absolute",
           left: "50%",
           transform: "translateX(-50%)",
-          fontSize: "30px", // Add font size parameter
+          fontSize: "30px",
         }}
       >
         Stock Portfolio Tracker

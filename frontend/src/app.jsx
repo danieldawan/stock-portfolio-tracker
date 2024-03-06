@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom"; // Import necessary components from react-router-dom v6
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Sidebar from "./sidebar.jsx";
 import Header from "./header.jsx";
 import Content from "./content.jsx";
