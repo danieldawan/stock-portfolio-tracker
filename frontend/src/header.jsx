@@ -1,20 +1,37 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Card, CardHeader } from "@nextui-org/react";
 
 const Header = () => {
+  // State to store the total portfolio value
+  const [totalValue, setTotalValue] = useState("");
+
+  // Fetch the total portfolio value from the backend on component mount
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000//total-portfolio-value")
+      .then((response) => response.json())
+      .then((data) => {
+        setTotalValue(data.total_portfolio_value.toFixed(2));
+      })
+      .catch((error) => {
+        console.error("Error fetching total portfolio value:", error);
+        setTotalValue("Error");
+      });
+  }, []); // Empty dependency array means this effect runs once on mount
+
   return (
     <header
       style={{
         width: "100%",
-        height: "120px",
+        height: "100px",
         backgroundColor: "black",
         position: "fixed",
         top: "0",
         left: "0",
         display: "flex",
-        justifyContent: "space-between", // Keeps left and right elements at the edges
+        justifyContent: "space-between",
         alignItems: "center",
-        padding: "0 20px", // Adjust padding as needed
+        padding: "0 20px",
+        zIndex: 1000,
       }}
     >
       {/* Left Container for the Total Value Card */}
@@ -23,14 +40,15 @@ const Header = () => {
           className="my-4"
           style={{
             width: "110px",
-            backgroundColor: "black", // Set the background color to black
-            color: "white", // Ensure text color is white for visibility
+            backgroundColor: "black",
+            color: "white",
           }}
-          bordered // Adds a border to the card for better visibility
+          bordered
         >
           <CardHeader className="flex-col items-start justify-between">
             <h4 style={{ margin: 0, fontWeight: "bold" }}>Total Value</h4>
-            <small>$1,234.56</small> {/* Static value */}
+            {/* Dynamically display the total value */}
+            <small>${totalValue}</small>
           </CardHeader>
         </Card>
       </div>
