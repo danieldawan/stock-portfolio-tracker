@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Import Navigate
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom"; // Import HashRouter
 import Sidebar from "./sidebar.jsx";
 import Header from "./header.jsx";
 import Content from "./content.jsx";
@@ -11,7 +11,8 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
+      {" "}
       <NextUIProvider>
         <Header />
         <div
@@ -36,7 +37,7 @@ function App() {
           </div>
         </div>
       </NextUIProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

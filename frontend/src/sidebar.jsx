@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export default function Sidebar() {
   const [portfolioItems, setPortfolioItems] = useState([]);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     // Fetch the portfolio data from the backend
@@ -49,9 +51,7 @@ export default function Sidebar() {
         style={{ width: "200px", backgroundColor: "rgb(55, 55, 61)" }}
         isPressable={true}
         disableRipple={true}
-        onPress={() => {
-          window.location.href = `/summary`;
-        }}
+        onPress={() => navigate("/summary")} // Updated to use navigate
       >
         <CardHeader className="flex-col items-center justify-between">
           <h4 className="font-bold">Summary →</h4>
@@ -66,9 +66,7 @@ export default function Sidebar() {
           style={{ width: "200px" }}
           isPressable={true}
           disableRipple={true}
-          onPress={() => {
-            window.location.href = `/${item.ticker}`;
-          }}
+          onPress={() => navigate(`/${item.ticker}`)} // Updated to use navigate
         >
           <CardHeader className="flex-col items-start justify-between">
             <h4 className="font-bold">{item.ticker}</h4>

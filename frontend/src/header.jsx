@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button, Card, CardHeader } from "@nextui-org/react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const Header = () => {
-  // State to store the total portfolio value
   const [totalValue, setTotalValue] = useState("");
+  const navigate = useNavigate(); // Initialize useNavigate
 
-  // Fetch the total portfolio value from the backend on component mount
   useEffect(() => {
     fetch(
       "https://mcsbt-integration-416413.lm.r.appspot.com/total-portfolio-value"
@@ -18,7 +18,12 @@ const Header = () => {
         console.error("Error fetching total portfolio value:", error);
         setTotalValue("Error");
       });
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []);
+
+  const handleLogout = () => {
+    // Perform logout logic here (e.g., clearing session/storage)
+    navigate("/login"); // Navigate to the login page
+  };
 
   return (
     <header
@@ -36,20 +41,13 @@ const Header = () => {
         zIndex: 1000,
       }}
     >
-      {/* Left Container for the Total Value Card */}
       <div style={{ display: "flex" }}>
         <Card
-          className="my-4"
-          style={{
-            width: "110px",
-            backgroundColor: "black",
-            color: "white",
-          }}
+          style={{ width: "110px", backgroundColor: "black", color: "white" }}
           bordered
         >
           <CardHeader className="flex-col items-start justify-between">
             <h4 style={{ margin: 0, fontWeight: "bold" }}>Total Value</h4>
-            {/* Display the total value */}
             <small>${totalValue}</small>
           </CardHeader>
         </Card>
@@ -69,9 +67,8 @@ const Header = () => {
         Stock Portfolio Tracker
       </h1>
 
-      {/* Right Container for the Logout Button */}
       <div style={{ display: "flex" }}>
-        <Button color="default" auto>
+        <Button color="default" auto onClick={handleLogout}>
           Logout
         </Button>
       </div>

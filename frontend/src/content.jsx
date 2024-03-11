@@ -12,11 +12,14 @@ import {
 const Content = ({ marginTop = "20px" }) => {
   const location = useLocation();
   const [stockInfo, setStockInfo] = useState([]);
-  const isSummaryPage = location.pathname === "/summary";
+
+  // Parse the hash part of the URL to get the route
+  const pathSegments = location.hash.substring(1).split("/"); // Remove the '#' and split
+  const isSummaryPage = pathSegments[1] === "summary"; // Check if the path is for the summary page
+  const ticker = pathSegments[1]; // The ticker would be the second segment in a hash-based route
 
   useEffect(() => {
     if (!isSummaryPage) {
-      const ticker = location.pathname.substring(1); // Extract ticker from the pathname
       fetch(`https://mcsbt-integration-416413.lm.r.appspot.com/${ticker}`)
         .then((response) => response.json())
         .then((data) => {
@@ -42,7 +45,7 @@ const Content = ({ marginTop = "20px" }) => {
           console.error("Error fetching stock information:", error)
         );
     }
-  }, [location.pathname]); // Depend on location.pathname for fetching stock data
+  }, [location.hash]); // Depend on location.hash for re-fetching when the hash changes
 
   if (isSummaryPage) {
     return (
@@ -65,7 +68,7 @@ const Content = ({ marginTop = "20px" }) => {
           fontSize: "20px",
         }}
       >
-        {location.pathname.substring(1).toUpperCase()} Weekly Time Series ($)
+        {ticker.toUpperCase()} Weekly Time Series ($)
       </h2>
       <Table aria-label="Stock Information Table">
         <TableHeader>
