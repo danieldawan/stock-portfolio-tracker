@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom"; // Import useParams
 import {
   Table,
   TableHeader,
@@ -12,40 +12,56 @@ import {
 const Content = ({ marginTop = "20px" }) => {
   const location = useLocation();
   const [stockInfo, setStockInfo] = useState([]);
+  const { ticker } = useParams(); // Use useParams to get the ticker
 
-  // Parse the hash part of the URL to get the route
-  const pathSegments = location.hash.substring(1).split("/"); // Remove the '#' and split
-  const isSummaryPage = pathSegments[1] === "summary"; // Check if the path is for the summary page
-  const ticker = pathSegments[1]; // The ticker would be the second segment in a hash-based route
+  // Determine if the current page is the summary page based on the ticker
+  const isSummaryPage =
+    location.pathname.includes("summary") || typeof ticker === "undefined";
+
+  console.log({
+    location,
+    stockInfo,
+    isSummaryPage,
+    ticker, // Now directly obtained from useParams
+  });
 
   useEffect(() => {
-    if (!isSummaryPage) {
+    // Check if the ticker is defined before attempting to fetch stock info
+    if (ticker) {
       fetch(`https://mcsbt-integration-416413.lm.r.appspot.com/${ticker}`)
-        .then((response) => response.json())
-        .then((data) => {
-          let formattedData = Object.entries(data.stock_info).map(
-            ([date, info]) => ({
-              date,
-              open: info["1. open"],
-              high: info["2. high"],
-              low: info["3. low"],
-              close: info["4. close"],
-              volume: info["5. volume"],
-            })
-          );
-
-          // Sort the data in reverse chronological order by date
-          formattedData.sort((a, b) => {
-            return b.date.localeCompare(a.date);
-          });
-
-          setStockInfo(formattedData);
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
         })
-        .catch((error) =>
-          console.error("Error fetching stock information:", error)
-        );
+        .then((data) => {
+          if (data && data.stock_info) {
+            let formattedData = Object.entries(data.stock_info).map(
+              ([date, info]) => ({
+                date,
+                open: info["1. open"],
+                high: info["2. high"],
+                low: info["3. low"],
+                close: info["4. close"],
+                volume: info["5. volume"],
+              })
+            );
+            formattedData.sort((a, b) => b.date.localeCompare(a.date));
+            setStockInfo(formattedData);
+          } else {
+            console.error("Missing or invalid stock_info data");
+            setStockInfo([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching stock information:", error);
+          setStockInfo([]);
+        });
     }
-  }, [location.hash]); // Depend on location.hash for re-fetching when the hash changes
+  }, [ticker]); // Depend on ticker for re-fetching data
+
+  const displayTicker = ticker ? ticker.toUpperCase() : "N/A";
 
   if (isSummaryPage) {
     return (
@@ -57,7 +73,6 @@ const Content = ({ marginTop = "20px" }) => {
     );
   }
 
-  // Render stock information table for specific ticker routes
   return (
     <div style={{ marginTop, width: "100%", maxWidth: "800px" }}>
       <h2
@@ -68,7 +83,7 @@ const Content = ({ marginTop = "20px" }) => {
           fontSize: "20px",
         }}
       >
-        {ticker.toUpperCase()} Weekly Time Series ($)
+        {displayTicker} Weekly Time Series ($)
       </h2>
       <Table aria-label="Stock Information Table">
         <TableHeader>
