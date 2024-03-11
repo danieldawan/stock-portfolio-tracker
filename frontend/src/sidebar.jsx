@@ -6,7 +6,8 @@ export default function Sidebar() {
   const [portfolioItems, setPortfolioItems] = useState([]);
   const navigate = useNavigate();
   const [hoverIndex, setHoverIndex] = useState(null);
-  const [showSearchBox, setShowSearchBox] = useState(false); // State to control the visibility of the search box
+  const [showSearchBox, setShowSearchBox] = useState(false);
+  const [inputValue, setInputValue] = useState(""); // Added state for handling input value
 
   useEffect(() => {
     fetch(`https://mcsbt-integration-416413.lm.r.appspot.com`)
@@ -42,6 +43,11 @@ export default function Sidebar() {
       fetchPercentageChanges().catch(console.error);
     }
   }, [portfolioItems.length]);
+
+  // Handler to update the input state
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value.toUpperCase()); // Convert input value to uppercase
+  };
 
   return (
     <div style={{ marginLeft: "30px" }}>
@@ -147,6 +153,8 @@ export default function Sidebar() {
         >
           <input
             type="text"
+            value={inputValue} // Bind input value to state
+            onChange={handleInputChange} // Update input value on change
             placeholder="Enter a stock"
             style={{
               fontSize: "14px",
@@ -168,7 +176,7 @@ export default function Sidebar() {
             }}
             aria-label="Confirm ticker"
           >
-            ✓
+            ✓ {/* Tick mark */}
           </Button>
         </div>
       </div>
