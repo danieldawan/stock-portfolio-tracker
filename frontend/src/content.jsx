@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom"; // Import useParams
+import { useLocation, useParams } from "react-router-dom";
 import {
   Table,
   TableHeader,
@@ -12,7 +12,7 @@ import {
 const Content = ({ marginTop = "20px" }) => {
   const location = useLocation();
   const [stockInfo, setStockInfo] = useState([]);
-  const { ticker } = useParams(); // Use useParams to get the ticker
+  const { ticker } = useParams();
 
   // Determine if the current page is the summary page based on the ticker
   const isSummaryPage =
@@ -22,7 +22,7 @@ const Content = ({ marginTop = "20px" }) => {
     location,
     stockInfo,
     isSummaryPage,
-    ticker, // Now directly obtained from useParams
+    ticker,
   });
 
   useEffect(() => {

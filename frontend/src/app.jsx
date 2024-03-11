@@ -18,7 +18,7 @@ function App() {
         <div
           style={{ display: "flex", paddingTop: "100px", minHeight: "100vh" }}
         >
-          <div style={{ width: "20%" }}>
+          <div style={{ width: "22%" }}>
             <Sidebar />
           </div>
           <div style={{ flex: 1 }}>
