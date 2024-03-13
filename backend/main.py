@@ -31,7 +31,7 @@ app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 
 #with app.app_context():
-    # db.create_all()
+    #db.create_all()
 
 #Finding the latest closing price for a given ticker (not user tied)
 def get_latest_closing_price(ticker):
@@ -46,25 +46,16 @@ def get_latest_closing_price(ticker):
 #Return a JSON with the stocks of a given user, where the json is structured as ticker:quantity
 @app.route('/portfolio/<user_id>', methods=["GET"])
 def homepage(user_id):
-    # Query the User model to get the user by user_id
     user = User.query.filter_by(id=user_id).first()
-
-    # Check if the user exists
     if user:
-        # Construct a list of stocks owned by the user
-        stocks_list = []
-        for stock in user.stocks.all():  # Use .all() to execute the query and fetch the results
-            stock_info = {
+        stocks_list = [
+            {
                 "ticker": stock.ticker,
-                "quantity": stock.quantity,
-                "purchase_price": stock.purchase_price
-            }
-            stocks_list.append(stock_info)
-
+                "quantity": stock.quantity
+            } for stock in user.stocks.all()
+        ]
         return jsonify(stocks_list)
-    else:
-        # Return an empty list or suitable message if the user does not exist
-        return jsonify({"message": "User not found"}), 404
+    return jsonify({"message": "User not found"}), 404
 
 #Return the weekly time series of a given ticker and the percentage change (not user tied)
 @app.route('/<ticker>', methods=["GET"])
@@ -120,12 +111,7 @@ def total_portfolio_value(user_id):
 #Add or update stock to a user's portfolio
 @app.route('/add-stock/<user_id>/<string:stock>/<int:quantity>', methods=["POST"])
 def add_stock(user_id, stock, quantity):
-    data = request.get_json()  # Extract the JSON payload from the request
-    purchase_price = data.get('purchase_price')  # Extract the purchase_price from the JSON payload
-
-    if purchase_price is None:  # Check if purchase_price is provided
-        return jsonify({"error": "Purchase price is required"}), 400
-
+    # You no longer need to extract 'purchase_price' from the request
     user = User.query.filter_by(id=user_id).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -133,9 +119,8 @@ def add_stock(user_id, stock, quantity):
     existing_stock = Stock.query.filter_by(user_id=user_id, ticker=stock).first()
     if existing_stock:
         existing_stock.quantity += quantity
-        # Optionally update the purchase_price here if needed
     else:
-        new_stock = Stock(ticker=stock, quantity=quantity, purchase_price=purchase_price, user_id=user_id)
+        new_stock = Stock(ticker=stock, quantity=quantity, user_id=user_id)
         db.session.add(new_stock)
 
     db.session.commit()
@@ -163,19 +148,16 @@ def register():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    
-    # Check if username already exists
+    email = data.get('email')
+
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already in use"}), 409
-    
-    # Hash the password for security
+
     hashed_password = generate_password_hash(password)
-    
-    # Create a new user instance with the correct model attribute
-    new_user = User(username=username, password_hash=hashed_password)
+    new_user = User(username=username, password_hash=hashed_password, email=email)
     db.session.add(new_user)
     db.session.commit()
-    
+
     return jsonify({"message": "User registered successfully"}), 201
 
 #Log in a user

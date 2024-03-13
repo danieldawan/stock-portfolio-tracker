@@ -69,7 +69,11 @@ const Header = ({ onLogout }) => {
         Stock Portfolio Tracker
       </h1>
 
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {" "}
+        <span style={{ color: "white", fontSize: "13px" }}>
+          Logged in as <b>danieldawan</b>
+        </span>
         <Button color="default" auto onClick={handleLogout}>
           Logout
         </Button>

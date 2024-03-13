@@ -7,7 +7,9 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [hoverIndex, setHoverIndex] = useState(null);
   const [showSearchBox, setShowSearchBox] = useState(false);
-  const [inputValue, setInputValue] = useState(""); // Added state for handling input value
+  const [inputValue, setInputValue] = useState("");
+  const [purchasePrice, setPurchasePrice] = useState(""); // State for purchase price
+  const [quantity, setQuantity] = useState(""); // State for quantity
 
   useEffect(() => {
     fetch(`https://mcsbt-integration-416413.lm.r.appspot.com`)
@@ -44,9 +46,18 @@ export default function Sidebar() {
     }
   }, [portfolioItems.length]);
 
-  // Handler to update the input state
   const handleInputChange = (e) => {
-    setInputValue(e.target.value.toUpperCase()); // Convert input value to uppercase
+    setInputValue(e.target.value.toUpperCase());
+  };
+
+  const handlePurchasePriceChange = (e) => {
+    const value = e.target.value.replace(/,/g, ".").replace(/[^0-9.]/g, "");
+    setPurchasePrice(value);
+  };
+
+  const handleQuantityChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+    setQuantity(value);
   };
 
   return (
@@ -147,36 +158,78 @@ export default function Sidebar() {
             width: "200px",
             marginTop: "15px",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: "2px",
+            gap: "0px",
           }}
         >
           <input
             type="text"
-            value={inputValue} // Bind input value to state
-            onChange={handleInputChange} // Update input value on change
+            value={inputValue}
+            onChange={handleInputChange}
             placeholder="Enter a stock"
             style={{
               fontSize: "14px",
-              borderRadius: "10px 0 0 10px",
+              borderRadius: "10px 10px 0 0", // Round top corners, straight bottom corners
               border: "1px solid #ccc",
               padding: "5px 10px",
-              marginRight: "-1px",
               boxSizing: "border-box",
-              width: "150px",
+              width: "200px",
             }}
           />
+
+          <input
+            type="text"
+            value={purchasePrice}
+            onChange={handlePurchasePriceChange}
+            placeholder="Purchase Price"
+            style={{
+              fontSize: "14px",
+              borderRadius: "0", // Completely rectangular
+              borderTop: "0", // Remove top border to eliminate space
+              borderLeft: "1px solid #ccc",
+              borderRight: "1px solid #ccc",
+              borderBottom: "1px solid #ccc",
+              padding: "5px 10px",
+              boxSizing: "border-box",
+              width: "200px",
+            }}
+          />
+
+          <input
+            type="text"
+            value={quantity}
+            onChange={handleQuantityChange}
+            placeholder="Quantity"
+            style={{
+              fontSize: "14px",
+              borderRadius: "0", // Completely rectangular
+              borderTop: "0", // Remove top border to eliminate space
+              borderLeft: "1px solid #ccc",
+              borderRight: "1px solid #ccc",
+              borderBottom: "1px solid #ccc",
+              padding: "5px 10px",
+              boxSizing: "border-box",
+              width: "200px",
+            }}
+          />
+
           <Button
             style={{
-              borderRadius: "0 10px 10px 0",
-              padding: "0 12px",
+              borderRadius: "0 0 10px 10px", // Straight top corners, rounded bottom corners
+              padding: "5px 10px",
               boxSizing: "border-box",
-              minWidth: "50px",
-              height: "35px",
+              width: "200px",
+              height: "30px",
+              fontSize: "14px",
+              borderTop: "0", // Remove top border to eliminate space
+              borderLeft: "1px solid #ccc",
+              borderRight: "1px solid #ccc",
+              borderBottom: "1px solid #ccc",
             }}
-            aria-label="Confirm ticker"
+            aria-label="Confirm entries"
           >
-            ✓ {/* Tick mark */}
+            Confirm
           </Button>
         </div>
       </div>

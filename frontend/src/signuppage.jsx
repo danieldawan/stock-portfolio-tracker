@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "@nextui-org/react"; // Import Button from @nextui-org/react
+import { Button } from "@nextui-org/react"; // Assuming Button accepts style prop or replace with standard button if necessary
 import { Link, useNavigate } from "react-router-dom";
 
 const RegisterPage = ({ onRegister }) => {
@@ -37,15 +37,15 @@ const RegisterPage = ({ onRegister }) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "20px", // Controls the distance between elements
+          gap: "0px", // This controls the distance between elements
           width: "300px", // Adjust the form width here
           textAlign: "center", // Ensures text elements inside the form are centered
         }}
       >
         <h2
           style={{
-            fontSize: "24px", // Makes the header larger
-            margin: "0 0 10px 0", // Adjusts spacing to match the form's gap
+            fontSize: "24px",
+            margin: "0 0 15px 0",
             fontWeight: "600",
           }}
         >
@@ -58,10 +58,25 @@ const RegisterPage = ({ onRegister }) => {
           placeholder="Username"
           style={{
             fontSize: "14px",
-            borderRadius: "10px",
+            borderRadius: "10px 10px 0 0", // Adjusted borderRadius for the top input
             border: "1px solid #ccc",
             padding: "10px",
-            width: "100%", // Adjust the width of input elements
+            width: "100%",
+          }}
+        />
+        {/* Assuming email input was missing from your desired adjustments, including it here with appropriate styles */}
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          style={{
+            fontSize: "14px",
+            borderRadius: "0", // Straight corners for middle inputs
+            border: "1px solid #ccc",
+            borderTop: "0", // Remove top border to eliminate space
+            padding: "10px",
+            width: "100%",
           }}
         />
         <input
@@ -71,10 +86,11 @@ const RegisterPage = ({ onRegister }) => {
           placeholder="Password"
           style={{
             fontSize: "14px",
-            borderRadius: "10px",
+            borderRadius: "0", // Straight corners
             border: "1px solid #ccc",
+            borderTop: "0", // Remove top border
             padding: "10px",
-            width: "100%", // Adjust the width of input elements
+            width: "100%",
           }}
         />
         <input
@@ -84,23 +100,32 @@ const RegisterPage = ({ onRegister }) => {
           placeholder="Confirm Password"
           style={{
             fontSize: "14px",
-            borderRadius: "10px",
+            borderRadius: "0 0 0 0", // Adjusted borderRadius for the bottom input
             border: "1px solid #ccc",
+            borderTop: "0", // Remove top border
             padding: "10px",
-            width: "100%", // Adjust the width of input elements
+            width: "100%",
           }}
         />
         <Button
           fullWidth
           auto
-          onClick={handleSubmit} // Use the Button from @nextui-org/react for the submit action
-          css={{
-            borderRadius: "10px",
+          type="submit"
+          style={{
+            borderRadius: "0 0 10px 10px", // Rounded corners for the button if separate from inputs
+            padding: "5px 10px",
+            boxSizing: "border-box",
+            width: "100%", // Adjusted to full width for consistency
+            height: "35px", // Adjusted height
+            fontSize: "14px",
+            border: "1px solid #ccc", // Apply border styling consistently
+            marginTop: "-1px", // Space between last input and button, adjust as needed
+            disableAnimation: true, // Disable NextUI's button animation
           }}
         >
           Register
         </Button>
-        <p style={{ marginTop: "10px", fontSize: "13px" }}>
+        <p style={{ marginTop: "15px", fontSize: "13px" }}>
           Already registered? Login{" "}
           <Link
             to="/login"

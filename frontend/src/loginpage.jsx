@@ -1,18 +1,46 @@
 import React, { useState } from "react";
-import { Button } from "@nextui-org/react"; // Import Button from @nextui-org/react
+import { Button } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = ({ onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Initialize navigate
+  const [error, setError] = useState(""); // Add state to manage error messages
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login attempt with:", username, password);
-    // Placeholder for successful login
-    onLogin(true);
-    navigate("/summary"); // Redirect to the summary page
+
+    const loginDetails = { username, password };
+
+    try {
+      const response = await fetch(
+        "https://mcsbt-integration-416413.lm.r.appspot.com/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(loginDetails),
+        }
+      );
+
+      if (!response.ok) {
+        // If response is not OK, throw an error with the response status
+        const errorData = await response.json(); // Assuming the server responds with JSON
+        throw new Error(errorData.error || "Failed to login");
+      }
+
+      const data = await response.json();
+      console.log("Login successful:", data.message);
+      // Placeholder for successful login
+      onLogin(true);
+      navigate("/summary"); // Redirect to the summary page
+    } catch (error) {
+      console.error("Login error:", error.message);
+      setError(error.message); // Update error state to display the message
+      alert(error.message); // Using simple alert for error feedback
+    }
   };
 
   return (
@@ -29,17 +57,13 @@ const LoginPage = ({ onLogin }) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "20px", // This controls the distance between elements
-          width: "300px", // Adjust the form width here
-          textAlign: "center", // Ensures text elements inside the form are centered
+          gap: "0px",
+          width: "300px",
+          textAlign: "center",
         }}
       >
         <h2
-          style={{
-            fontSize: "24px", // Makes the login header larger
-            margin: "0 0 10px 0", // Adjusts spacing to match the form's gap, remove bottom margin if needed
-            fontWeight: "600",
-          }}
+          style={{ fontSize: "24px", margin: "0 0 15px 0", fontWeight: "600" }}
         >
           Stock Portfolio Tracker
         </h2>
@@ -50,10 +74,10 @@ const LoginPage = ({ onLogin }) => {
           placeholder="Username"
           style={{
             fontSize: "14px",
-            borderRadius: "10px",
+            borderRadius: "10px 10px 0 0", // Adjusted borderRadius
             border: "1px solid #ccc",
             padding: "10px",
-            width: "100%", // Use this to adjust the width of input elements
+            width: "100%",
           }}
         />
         <input
@@ -63,23 +87,33 @@ const LoginPage = ({ onLogin }) => {
           placeholder="Password"
           style={{
             fontSize: "14px",
-            borderRadius: "10px",
+            borderRadius: "0", // Straight corners
             border: "1px solid #ccc",
+            borderTop: "0", // Remove top border
             padding: "10px",
-            width: "100%", // Use this to adjust the width of input elements
+            width: "100%",
           }}
         />
         <Button
           fullWidth
           auto
-          onClick={handleSubmit} // Use the Button from @nextui-org/react for the submit action
-          css={{
-            borderRadius: "10px",
+          type="submit"
+          style={{
+            borderRadius: "0 0 10px 10px", // Straight top corners, rounded bottom corners
+            padding: "5px 10px",
+            boxSizing: "border-box",
+            width: "100%", // Adjusted to full width for consistency
+            height: "35px", // Adjusted height
+            fontSize: "14px",
+            borderTop: "0", // Remove top border to eliminate space
+            border: "1px solid #ccc", // Apply border styling consistently
+            marginTop: "-1px", // Ensure no gap between this and the previous element
+            disableAnimation: true, // Disable NextUI's button animation
           }}
         >
           Login
         </Button>
-        <p style={{ marginTop: "10px", fontSize: "13px" }}>
+        <p style={{ marginTop: "15px", fontSize: "13px" }}>
           Not registered? Register{" "}
           <Link
             to="/register"
@@ -87,6 +121,7 @@ const LoginPage = ({ onLogin }) => {
           >
             <strong>here</strong>
           </Link>
+          .
         </p>
       </form>
     </div>
