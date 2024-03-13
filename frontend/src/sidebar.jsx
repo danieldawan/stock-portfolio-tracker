@@ -27,6 +27,28 @@ export default function Sidebar() {
     }
   }, [user, reloadSidebar]); // Include reloadSidebar in dependency array
 
+  useEffect(() => {
+    const fetchPercentageChanges = async () => {
+      if (portfolioItems.length === 0) return; // Exit if portfolioItems is empty
+
+      const promises = portfolioItems.map((item) =>
+        fetch(
+          `https://mcsbt-integration-416413.lm.r.appspot.com/${item.ticker}`
+        ).then((response) => response.json())
+      );
+
+      const results = await Promise.all(promises);
+      const updatedItems = portfolioItems.map((item, index) => ({
+        ...item,
+        stock_info: results[index],
+      }));
+
+      setPortfolioItems(updatedItems);
+    };
+
+    fetchPercentageChanges().catch(console.error);
+  }, [portfolioItems.length]);
+
   const handleInputChange = (e) => {
     setInputValue(e.target.value.toUpperCase());
   };
