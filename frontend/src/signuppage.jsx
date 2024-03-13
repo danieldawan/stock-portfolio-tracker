@@ -1,26 +1,52 @@
 import React, { useState } from "react";
-import { Button } from "@nextui-org/react"; // Assuming Button accepts style prop or replace with standard button if necessary
+import { Button } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "./UserContext"; // Import useUser hook
 
-const RegisterPage = ({ onRegister }) => {
+const RegisterPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const navigate = useNavigate(); // Initialize navigate
+  const { setUserData } = useUser(); // Use the setUserData function from the context
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(
-      "Registration attempt with:",
-      username,
-      email,
-      password,
-      confirmPassword
-    );
-    // Placeholder for successful registration
-    onRegister(true);
-    navigate("/summary"); // Redirect to the summary page
+
+    // Validate form inputs
+    if (!username || !email || !password || !confirmPassword) {
+      alert("Please fill in all the fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://mcsbt-integration-416413.lm.r.appspot.com/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password }),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to register");
+      }
+
+      console.log("User registered successfully:", data.message);
+      setUserData({ username: username, id: data.userId }); // Update the user context with the registered user's data
+      navigate("/summary"); // Redirect to the summary page upon successful registration
+    } catch (error) {
+      alert(error.message); // Display registration error message
+    }
   };
 
   return (
@@ -37,7 +63,7 @@ const RegisterPage = ({ onRegister }) => {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "0px", // This controls the distance between elements
+          gap: "0px", // Controls the distance between elements
           width: "300px", // Adjust the form width here
           textAlign: "center", // Ensures text elements inside the form are centered
         }}
@@ -64,7 +90,6 @@ const RegisterPage = ({ onRegister }) => {
             width: "100%",
           }}
         />
-        {/* Assuming email input was missing from your desired adjustments, including it here with appropriate styles */}
         <input
           type="email"
           value={email}
@@ -113,14 +138,13 @@ const RegisterPage = ({ onRegister }) => {
           type="submit"
           style={{
             borderRadius: "0 0 10px 10px", // Rounded corners for the button if separate from inputs
-            padding: "5px 10px",
+            padding: "10px",
             boxSizing: "border-box",
             width: "100%", // Adjusted to full width for consistency
             height: "35px", // Adjusted height
             fontSize: "14px",
             border: "1px solid #ccc", // Apply border styling consistently
             marginTop: "-1px", // Space between last input and button, adjust as needed
-            disableAnimation: true, // Disable NextUI's button animation
           }}
         >
           Register
@@ -129,10 +153,11 @@ const RegisterPage = ({ onRegister }) => {
           Already registered? Login{" "}
           <Link
             to="/login"
-            style={{ color: "inherit", textDecoration: "inherit" }}
+            style={{ color: "inherit", textDecoration: "none" }}
           >
             <strong>here</strong>
           </Link>
+          .
         </p>
       </form>
     </div>

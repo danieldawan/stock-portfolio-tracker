@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Button } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "./UserContext"; // Import useUser hook from your UserContext file
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // Add state to manage error messages
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setUserData } = useUser(); // Use the setUserData function from context to update user state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,20 +28,19 @@ const LoginPage = ({ onLogin }) => {
       );
 
       if (!response.ok) {
-        // If response is not OK, throw an error with the response status
-        const errorData = await response.json(); // Assuming the server responds with JSON
+        const errorData = await response.json();
         throw new Error(errorData.error || "Failed to login");
       }
 
       const data = await response.json();
       console.log("Login successful:", data.message);
-      // Placeholder for successful login
-      onLogin(true);
+
+      setUserData({ username: username, id: data.userId }); // Update the user context with the logged-in user's data
       navigate("/summary"); // Redirect to the summary page
     } catch (error) {
       console.error("Login error:", error.message);
-      setError(error.message); // Update error state to display the message
-      alert(error.message); // Using simple alert for error feedback
+      setError(error.message); // Optionally update error state to display the message
+      alert(error.message); // Display the error message to the user
     }
   };
 

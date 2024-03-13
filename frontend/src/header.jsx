@@ -1,27 +1,66 @@
 import React, { useState, useEffect } from "react";
 import { Button, Card, CardHeader } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "./UserContext"; // Import the useUser hook
 
-const Header = ({ onLogout }) => {
+const Header = () => {
   const [totalValue, setTotalValue] = useState(null);
+  const { user, setUserData } = useUser(); // Use the user context
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("User object:", user);
+    if (!user) {
+      console.error("User ID is not available.");
+      return;
+    }
+
+    console.log("User ID is", user.id); // Move inside useEffect to access user object
+
     fetch(
-      "https://mcsbt-integration-416413.lm.r.appspot.com/total-portfolio-value"
+      `https://mcsbt-integration-416413.lm.r.appspot.com/total-portfolio-value/${user.username}`
     )
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch portfolio value");
+        }
+        return response.json();
+      })
       .then((data) => {
         setTotalValue(data.total_portfolio_value);
       })
       .catch((error) => {
         console.error("Error fetching total portfolio value:", error);
-        setTotalValue("Error");
+        setTotalValue("0");
       });
-  }, []);
+  }, [user]);
 
-  const handleLogout = () => {
-    onLogout(false);
+  const handleLogout = async () => {
+    // Optionally make a logout API call to your backend
+    try {
+      const response = await fetch(
+        "https://mcsbt-integration-416413.lm.r.appspot.com/logout",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        // Handle any errors from your API
+        throw new Error("Logout failed");
+      }
+
+      // Successfully logged out from backend
+      console.log("Logged out successfully");
+    } catch (error) {
+      console.error(error.message);
+    }
+
+    // Clear the user context
+    setUserData(null);
     navigate("/login");
   };
 
@@ -70,10 +109,12 @@ const Header = ({ onLogout }) => {
       </h1>
 
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        {" "}
-        <span style={{ color: "white", fontSize: "13px" }}>
-          Logged in as <b>danieldawan</b>
-        </span>
+        {user && (
+          <span style={{ color: "white", fontSize: "13px" }}>
+            Logged in as <b>{user.username}</b>{" "}
+            {/* Display the dynamically logged-in username */}
+          </span>
+        )}
         <Button color="default" auto onClick={handleLogout}>
           Logout
         </Button>

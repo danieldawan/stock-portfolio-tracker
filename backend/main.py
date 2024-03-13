@@ -44,9 +44,9 @@ def get_latest_closing_price(ticker):
     return float(latest_close_price)
 
 #Return a JSON with the stocks of a given user, where the json is structured as ticker:quantity
-@app.route('/portfolio/<user_id>', methods=["GET"])
-def homepage(user_id):
-    user = User.query.filter_by(id=user_id).first()
+@app.route('/portfolio/<username>', methods=["GET"])
+def homepage(username):
+    user = User.query.filter_by(username=username).first()
     if user:
         stocks_list = [
             {
@@ -88,9 +88,9 @@ def ticker_info(ticker):
         return {"error": "Failed to fetch ticker information"}, 500
 
 #Return the total portfolio value of a given user
-@app.route('/total-portfolio-value/<user_id>', methods=["GET"])
-def total_portfolio_value(user_id):
-    user = User.query.filter_by(id=user_id).first()
+@app.route('/total-portfolio-value/<username>', methods=["GET"])
+def total_portfolio_value(username):
+    user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -105,40 +105,40 @@ def total_portfolio_value(user_id):
         except Exception as e:
             # Handle potential errors gracefully, perhaps logging them
             continue  # Optionally, decide how to handle individual stock errors
-
+    
     return jsonify({"total_portfolio_value": total_value})
 
 #Add or update stock to a user's portfolio
-@app.route('/add-stock/<user_id>/<string:stock>/<int:quantity>', methods=["POST"])
-def add_stock(user_id, stock, quantity):
+@app.route('/add-stock/<username>/<string:stock>/<int:quantity>', methods=["POST"])
+def add_stock(username, stock, quantity):
     # You no longer need to extract 'purchase_price' from the request
-    user = User.query.filter_by(id=user_id).first()
+    user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    existing_stock = Stock.query.filter_by(user_id=user_id, ticker=stock).first()
+    existing_stock = Stock.query.filter_by(user_id=user.id, ticker=stock).first()
     if existing_stock:
         existing_stock.quantity += quantity
     else:
-        new_stock = Stock(ticker=stock, quantity=quantity, user_id=user_id)
+        new_stock = Stock(ticker=stock, quantity=quantity, user_id=user.id)
         db.session.add(new_stock)
 
     db.session.commit()
 
-    return jsonify({"message": f"{quantity} units of stock {stock} added for user {user_id}"})
+    return jsonify({"message": f"{quantity} units of stock {stock} added for user {username}"})
 
 #Remove stock from a user's portfolio
-@app.route('/remove-stock/<user_id>/<string:stock>', methods=["DELETE"])
-def remove_stock(user_id, stock):
-    user = User.query.filter_by(id=user_id).first()
+@app.route('/remove-stock/<string:username>/<string:stock>', methods=["DELETE"])
+def remove_stock(username, stock):
+    user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    stock_to_remove = Stock.query.filter_by(user_id=user_id, ticker=stock).first()
+    stock_to_remove = Stock.query.filter_by(user_id=user.id, ticker=stock).first()
     if stock_to_remove:
         db.session.delete(stock_to_remove)
         db.session.commit()
-        return jsonify({"message": f"Stock {stock} removed for user {user_id}"})
+        return jsonify({"message": f"Stock {stock} removed for user {username}"})
     else:
         return jsonify({"error": "Stock not found"}), 404
 

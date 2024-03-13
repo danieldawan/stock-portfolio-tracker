@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, Button } from "@nextui-org/react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "./UserContext"; // Import the useUser hook
 
 export default function Sidebar() {
+  const { user } = useUser(); // Use the user context
   const [portfolioItems, setPortfolioItems] = useState([]);
+  const [reloadSidebar, setReloadSidebar] = useState(false); // State to trigger sidebar reload
   const navigate = useNavigate();
   const [hoverIndex, setHoverIndex] = useState(null);
   const [showSearchBox, setShowSearchBox] = useState(false);
@@ -12,52 +15,75 @@ export default function Sidebar() {
   const [quantity, setQuantity] = useState(""); // State for quantity
 
   useEffect(() => {
-    fetch(`https://mcsbt-integration-416413.lm.r.appspot.com`)
-      .then((response) => response.json())
-      .then((data) => {
-        const items = Object.entries(data).map(([ticker, quantity]) => ({
-          ticker,
-          quantity,
-        }));
-        setPortfolioItems(items);
-      })
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    const fetchPercentageChanges = async () => {
-      const promises = portfolioItems.map((item) =>
-        fetch(
-          `https://mcsbt-integration-416413.lm.r.appspot.com/${item.ticker}`
-        ).then((response) => response.json())
-      );
-
-      const results = await Promise.all(promises);
-      const updatedItems = portfolioItems.map((item, index) => ({
-        ...item,
-        percent_change: results[index].percent_change || "N/A",
-      }));
-
-      setPortfolioItems(updatedItems);
-    };
-
-    if (portfolioItems.length > 0) {
-      fetchPercentageChanges().catch(console.error);
+    if (user) {
+      fetch(
+        `https://mcsbt-integration-416413.lm.r.appspot.com/portfolio/${user.username}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setPortfolioItems(data);
+        })
+        .catch(console.error);
     }
-  }, [portfolioItems.length]);
+  }, [user, reloadSidebar]); // Include reloadSidebar in dependency array
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value.toUpperCase());
   };
 
-  const handlePurchasePriceChange = (e) => {
-    const value = e.target.value.replace(/,/g, ".").replace(/[^0-9.]/g, "");
-    setPurchasePrice(value);
-  };
-
   const handleQuantityChange = (e) => {
+    // Define handleQuantityChange at the component level
     const value = e.target.value.replace(/[^0-9]/g, "");
     setQuantity(value);
+  };
+
+  const handleAddStock = async () => {
+    try {
+      const response = await fetch(
+        `https://mcsbt-integration-416413.lm.r.appspot.com/add-stock/${user.username}/${inputValue}/${quantity}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            purchase_price: parseFloat(purchasePrice),
+            quantity: parseInt(quantity),
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to add stock");
+      }
+      console.log(`Stock ${inputValue} added.`);
+      setReloadSidebar(!reloadSidebar); // Trigger sidebar reload
+      setShowSearchBox(false); // Close the "Add stock" dialog
+      setInputValue(""); // Reset inputValue to empty string
+      setQuantity(""); // Reset quantity to empty string
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const handleRemoveStock = async (ticker) => {
+    try {
+      const response = await fetch(
+        `https://mcsbt-integration-416413.lm.r.appspot.com/remove-stock/${user.username}/${ticker}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to remove ticker");
+      }
+      console.log(`Ticker ${ticker} removed.`);
+      setReloadSidebar(!reloadSidebar); // Trigger sidebar reload
+    } catch (error) {
+      console.error(error.message);
+    }
   };
 
   return (
@@ -104,14 +130,14 @@ export default function Sidebar() {
                 fontWeight: "normal",
                 opacity: hoverIndex === index ? 1 : 0,
                 transition: "opacity 0.3s ease-in-out",
+                cursor: "pointer", // Add cursor pointer
               }}
               onClick={() => {
                 const isConfirmed = window.confirm(
                   `Would you like to remove the ticker ${item.ticker}?`
                 );
                 if (isConfirmed) {
-                  // Logic to remove the ticker
-                  console.log(`Ticker ${item.ticker} removed.`);
+                  handleRemoveStock(item.ticker);
                 }
               }}
             >
@@ -128,8 +154,8 @@ export default function Sidebar() {
             <CardHeader className="flex-col items-start justify-between">
               <h4 className="font-bold">{item.ticker}</h4>
               <small>
-                {item.percent_change
-                  ? `${parseFloat(item.percent_change).toFixed(
+                {item.stock_info && item.stock_info.percent_change
+                  ? `${parseFloat(item.stock_info.percent_change).toFixed(
                       2
                     )}% from previous week`
                   : "Loading..."}
@@ -180,24 +206,6 @@ export default function Sidebar() {
 
           <input
             type="text"
-            value={purchasePrice}
-            onChange={handlePurchasePriceChange}
-            placeholder="Purchase Price"
-            style={{
-              fontSize: "14px",
-              borderRadius: "0", // Completely rectangular
-              borderTop: "0", // Remove top border to eliminate space
-              borderLeft: "1px solid #ccc",
-              borderRight: "1px solid #ccc",
-              borderBottom: "1px solid #ccc",
-              padding: "5px 10px",
-              boxSizing: "border-box",
-              width: "200px",
-            }}
-          />
-
-          <input
-            type="text"
             value={quantity}
             onChange={handleQuantityChange}
             placeholder="Quantity"
@@ -215,6 +223,7 @@ export default function Sidebar() {
           />
 
           <Button
+            onClick={handleAddStock} // Add onClick handler for adding stock
             style={{
               borderRadius: "0 0 10px 10px", // Straight top corners, rounded bottom corners
               padding: "5px 10px",
