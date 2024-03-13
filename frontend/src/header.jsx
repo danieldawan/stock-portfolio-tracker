@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Button, Card, CardHeader } from "@nextui-org/react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
-const Header = () => {
-  const [totalValue, setTotalValue] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate
+const Header = ({ onLogout }) => {
+  const [totalValue, setTotalValue] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(
@@ -12,7 +12,7 @@ const Header = () => {
     )
       .then((response) => response.json())
       .then((data) => {
-        setTotalValue(data.total_portfolio_value.toFixed(2));
+        setTotalValue(data.total_portfolio_value);
       })
       .catch((error) => {
         console.error("Error fetching total portfolio value:", error);
@@ -21,8 +21,8 @@ const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    // Perform logout logic here (e.g., clearing session/storage)
-    navigate("/login"); // Navigate to the login page
+    onLogout(false);
+    navigate("/login");
   };
 
   return (
@@ -48,7 +48,9 @@ const Header = () => {
         >
           <CardHeader className="flex-col items-start justify-between">
             <h4 style={{ margin: 0, fontWeight: "bold" }}>Total Value</h4>
-            <small>${totalValue}</small>
+            <small>
+              {totalValue === null ? "Loading..." : `$${totalValue}`}
+            </small>
           </CardHeader>
         </Card>
       </div>
