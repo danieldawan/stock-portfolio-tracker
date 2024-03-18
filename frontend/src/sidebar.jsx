@@ -68,15 +68,16 @@ export default function Sidebar() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            purchase_price: parseFloat(purchasePrice),
-            quantity: parseInt(quantity),
-          }),
         }
       );
+
+      const data = await response.json(); // Parse the JSON response from the server
+
       if (!response.ok) {
-        throw new Error("Failed to add stock");
+        // If the response status is not OK, it means there was an error
+        throw new Error(data.error || "Failed to add stock");
       }
+
       console.log(`Stock ${inputValue} added.`);
       setReloadSidebar(!reloadSidebar); // Trigger sidebar reload
       triggerReload();
@@ -85,6 +86,9 @@ export default function Sidebar() {
       setQuantity(""); // Reset quantity to empty string
     } catch (error) {
       console.error(error.message);
+      alert(error.message); // Display the error message in a dialog
+      setInputValue("");
+      setQuantity("");
     }
   };
 

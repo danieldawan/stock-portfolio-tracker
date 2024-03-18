@@ -111,10 +111,16 @@ def total_portfolio_value(username):
 #Add or update stock to a user's portfolio
 @app.route('/add-stock/<username>/<string:stock>/<int:quantity>', methods=["POST"])
 def add_stock(username, stock, quantity):
-    # You no longer need to extract 'purchase_price' from the request
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
+
+    try:
+        # Use get_latest_closing_price to check if the stock ticker is valid
+        get_latest_closing_price(stock)
+    except Exception as e:
+        # If an exception occurs, it means the ticker might not be valid or another error occurred
+        return jsonify({"error": f"Invalid or inaccessible stock ticker: {stock}"}), 400
 
     existing_stock = Stock.query.filter_by(user_id=user.id, ticker=stock).first()
     if existing_stock:
