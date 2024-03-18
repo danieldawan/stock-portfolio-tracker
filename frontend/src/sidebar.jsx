@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext"; // Import the useUser hook
 
 export default function Sidebar() {
-  const { user } = useUser(); // Use the user context
+  const { user, triggerReload } = useUser(); // Use the user context
   const [portfolioItems, setPortfolioItems] = useState([]);
   const [reloadSidebar, setReloadSidebar] = useState(false); // State to trigger sidebar reload
   const navigate = useNavigate();
@@ -79,6 +79,7 @@ export default function Sidebar() {
       }
       console.log(`Stock ${inputValue} added.`);
       setReloadSidebar(!reloadSidebar); // Trigger sidebar reload
+      triggerReload();
       setShowSearchBox(false); // Close the "Add stock" dialog
       setInputValue(""); // Reset inputValue to empty string
       setQuantity(""); // Reset quantity to empty string
@@ -103,6 +104,7 @@ export default function Sidebar() {
       }
       console.log(`Ticker ${ticker} removed.`);
       setReloadSidebar(!reloadSidebar); // Trigger sidebar reload
+      triggerReload();
     } catch (error) {
       console.error(error.message);
     }

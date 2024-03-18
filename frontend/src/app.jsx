@@ -6,7 +6,7 @@ import Content from "./content.jsx";
 import LoginPage from "./loginpage.jsx";
 import SignUpPage from "./signuppage.jsx";
 import { NextUIProvider } from "@nextui-org/react";
-import { UserProvider, useUser } from "./UserContext"; // Assuming UserContext.js is in the same directory
+import { UserProvider, useUser } from "./UserContext";
 
 function App() {
   useEffect(() => {

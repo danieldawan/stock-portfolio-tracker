@@ -5,7 +5,7 @@ import { useUser } from "./UserContext"; // Import the useUser hook
 
 const Header = () => {
   const [totalValue, setTotalValue] = useState(null);
-  const { user, setUserData } = useUser(); // Use the user context
+  const { user, setUserData, reloadTrigger } = useUser(); // Use the user context
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,13 +27,13 @@ const Header = () => {
         return response.json();
       })
       .then((data) => {
-        setTotalValue(data.total_portfolio_value);
+        setTotalValue(parseFloat(data.total_portfolio_value).toFixed(2));
       })
       .catch((error) => {
         console.error("Error fetching total portfolio value:", error);
         setTotalValue("0");
       });
-  }, [user]);
+  }, [user, reloadTrigger]);
 
   const handleLogout = async () => {
     // Optionally make a logout API call to your backend
