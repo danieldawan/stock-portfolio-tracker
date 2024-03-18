@@ -6,13 +6,12 @@ from flask_cors import CORS
 from flask import request, jsonify, session
 from models import db, User, Stock
 from sqlalchemy.pool import NullPool
-from werkzeug.security import generate_password_hash
-from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 
 app = Flask(__name__)
 app.secret_key = '156673d0aadd4b35e899d59664edd52f'
-CORS(app)
+CORS(app, supports_credentials=True)
 
 un = 'ADMIN'
 pw = 'CapstoneProject1'
