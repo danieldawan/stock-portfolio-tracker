@@ -97,19 +97,18 @@ def total_portfolio_value(username):
         return jsonify({"error": "User has no stocks"}), 404
 
     total_value = 0
-    for stock in user.stocks.all():  # Use .all() to fetch all Stock objects
+    for stock in user.stocks.all():
         try:
             latest_close_price = get_latest_closing_price(stock.ticker)
             total_value += latest_close_price * stock.quantity
         except Exception as e:
-            # Handle potential errors gracefully, perhaps logging them
-            continue  # Optionally, decide how to handle individual stock errors
+            continue
     
     return jsonify({"total_portfolio_value": total_value})
 
 #Return the percentage change of the total portfolio value of a given user for the past 10 weeks
-@app.route('/portfolio-value-change/<username>', methods=["GET"])
-def portfolio_value_change(username):
+@app.route('/portfolio-value-and-stock-prices/<username>', methods=["GET"])
+def portfolio_value_and_stock_prices(username):
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -118,6 +117,7 @@ def portfolio_value_change(username):
         return jsonify({"error": "User has no stocks"}), 404
 
     portfolio_values_by_date = {}
+    individual_stock_closing_prices = {}
 
     for stock in user.stocks.all():
         apikey = "2Q8AT87UOUTGOPGY"
@@ -128,6 +128,8 @@ def portfolio_value_change(username):
             data = response.json()
             weekly_data = data["Weekly Adjusted Time Series"]
 
+            stock_prices = []
+
             # Iterate over the last 10 weeks
             for week in list(weekly_data.keys())[:10]:
                 if week not in portfolio_values_by_date:
@@ -135,14 +137,23 @@ def portfolio_value_change(username):
                 weekly_close_price = float(weekly_data[week]["4. close"])
                 portfolio_values_by_date[week] += weekly_close_price * stock.quantity
 
+                # Add the weekly closing price for the current stock
+                stock_prices.append({"date": week, "closing_price": weekly_close_price})
+
+            # Add the stock prices to the individual stock closing prices dictionary
+            individual_stock_closing_prices[stock.ticker] = stock_prices
+
         except Exception as e:
             print(f"Error fetching data for {stock.ticker}: {e}")
-            # Handle error (e.g., continue to next stock, log error)
 
-    # Format the result as a list of dictionaries sorted by date
-    result = [{"date": date, "total_portfolio_value": value} for date, value in sorted(portfolio_values_by_date.items())]
+    # Sort the total portfolio values by date and prepare the final response
+    total_portfolio_values_sorted = [{"date": date, "total_portfolio_value": value} for date, value in sorted(portfolio_values_by_date.items())]
+    final_response = {
+        "total_portfolio_value_over_time": total_portfolio_values_sorted,
+        "individual_stock_closing_prices": individual_stock_closing_prices
+    }
 
-    return jsonify(result)
+    return jsonify(final_response)
 
 #Add or update stock to a user's portfolio
 @app.route('/add-stock/<username>/<string:stock>/<int:quantity>', methods=["POST"])
@@ -150,12 +161,10 @@ def add_stock(username, stock, quantity):
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
-
     try:
-        # Use get_latest_closing_price to check if the stock ticker is valid
+        # Using get_latest_closing_price to check if the stock ticker is valid
         get_latest_closing_price(stock)
     except Exception as e:
-        # If an exception occurs, it means the ticker might not be valid or another error occurred
         return jsonify({"error": f"Invalid or inaccessible stock ticker: {stock}"}), 400
 
     existing_stock = Stock.query.filter_by(user_id=user.id, ticker=stock).first()
