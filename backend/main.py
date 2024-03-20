@@ -107,6 +107,43 @@ def total_portfolio_value(username):
     
     return jsonify({"total_portfolio_value": total_value})
 
+#Return the percentage change of the total portfolio value of a given user for the past 10 weeks
+@app.route('/portfolio-value-change/<username>', methods=["GET"])
+def portfolio_value_change(username):
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    if user.stocks.count() == 0:
+        return jsonify({"error": "User has no stocks"}), 404
+
+    portfolio_values_by_date = {}
+
+    for stock in user.stocks.all():
+        apikey = "2Q8AT87UOUTGOPGY"
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY_ADJUSTED&symbol={stock.ticker}&apikey={apikey}"
+
+        try:
+            response = requests.get(url)
+            data = response.json()
+            weekly_data = data["Weekly Adjusted Time Series"]
+
+            # Iterate over the last 10 weeks
+            for week in list(weekly_data.keys())[:10]:
+                if week not in portfolio_values_by_date:
+                    portfolio_values_by_date[week] = 0
+                weekly_close_price = float(weekly_data[week]["4. close"])
+                portfolio_values_by_date[week] += weekly_close_price * stock.quantity
+
+        except Exception as e:
+            print(f"Error fetching data for {stock.ticker}: {e}")
+            # Handle error (e.g., continue to next stock, log error)
+
+    # Format the result as a list of dictionaries sorted by date
+    result = [{"date": date, "total_portfolio_value": value} for date, value in sorted(portfolio_values_by_date.items())]
+
+    return jsonify(result)
+
 #Add or update stock to a user's portfolio
 @app.route('/add-stock/<username>/<string:stock>/<int:quantity>', methods=["POST"])
 def add_stock(username, stock, quantity):
@@ -157,6 +194,9 @@ def register():
 
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already in use"}), 409
+    
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email already in use"}), 409
 
     hashed_password = generate_password_hash(password)
     new_user = User(username=username, password_hash=hashed_password, email=email)
