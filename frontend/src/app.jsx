@@ -6,6 +6,7 @@ import Content from "./content.jsx";
 import LoginPage from "./loginpage.jsx";
 import SignUpPage from "./signuppage.jsx";
 import { NextUIProvider } from "@nextui-org/react";
+import { AgChartsReact } from "ag-charts-react";
 import { UserProvider, useUser } from "./UserContext";
 
 function App() {
